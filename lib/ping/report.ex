@@ -1,6 +1,6 @@
-defmodule Ping.Monitor do
+defmodule Ping.Report do
   def sites do
-    ~w(apple cnn google microsoft nvidia spacex tesla yahoo)
+    ~w(amazon cnn facebook google instagram netflix reddit yahoo youtube x)
     |> Enum.map(&"www.#{&1}.com")
   end
 

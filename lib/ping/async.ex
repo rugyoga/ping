@@ -6,10 +6,7 @@ defmodule Ping.Async do
     end
     urls
     |> Stream.unfold(&receiver/1)
-    |> Stream.flat_map(
-      fn %Ping{} = p -> [p]
-         [_] = dead_ps -> Enum.map(dead_ps, &Ping.timed_out/1)
-      end)
+    |> Stream.flat_map(&List.wrap/1)
   end
 
   defp receiver([]), do: nil
@@ -17,7 +14,9 @@ defmodule Ping.Async do
     receive do
       %Ping{} = p -> {p, urls -- [p.url]}
     after
-      1_000 -> {urls, nil}
+      1_000 -> {Enum.map(urls, &dead_ping/1), []}
     end
   end
+
+  def dead_ping(url), do: %Ping{url: url, ping: nil}
 end
