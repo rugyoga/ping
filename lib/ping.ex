@@ -8,11 +8,20 @@ defmodule Ping do
 
   def responded?(ping), do: !timed_out?(ping)
 
-  @spec ping(binary) :: %Ping{}
+  @spec ping(String.t()) :: %Ping{}
   def ping(url) do
     System.cmd("ping", ["-c", "1", url])
     |> parse()
     |> then(fn parsed -> %Ping{url: url, ping: parsed["ping"], ip: parsed["ip"]} end)
+  end
+
+  @spec to_string(%Ping{}) :: String.t()
+  def to_string(%Ping{} = p) do
+    if Ping.responded?(p) do
+      "#{p.url} (#{p.ip}) responded in #{p.ping} ms"
+    else
+      "#{p.url} timed out"
+    end
   end
 
   defp parse({response, _}) do

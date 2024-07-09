@@ -4,16 +4,9 @@ defmodule Ping.Report do
     |> Enum.map(&"www.#{&1}.com")
   end
 
-  def report(results) do
-    for result <- results do
-      case result do
-        %Ping{} = p ->
-          if Ping.responded?(p) do
-            IO.puts "#{p.url} (#{p.ip}) responded in #{p.ping} ms"
-          else
-            IO.puts "#{p.url} timed out"
-          end
-      end
+  def report(pings) do
+    for ping <- pings do
+      IO.puts Ping.to_string(ping)
     end
   end
 
