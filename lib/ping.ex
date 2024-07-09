@@ -1,21 +1,27 @@
 defmodule Ping do
-  defstruct [:url, :ping, :ip]
+  defstruct [:host, :ms, :ip]
 
-  def timed_out(url), do: %Ping{url: url, ping: nil, ip: nil}
+  @doc """
+  Pings the given host using the system `ping` utility.
+  ## Examples
 
-  def timed_out?(%Ping{ping: ping}), do: is_nil(ping)
-  def timed_out?(_), do: true
+      iex> Ping.ping("www.amazon.com")
+      %Ping{host: "www.amazon.com", ms: "25.404", ip: "18.164.107.218"}
 
-  def responded?(ping), do: !timed_out?(ping)
+  Pinging Netflix times out:
 
-  @spec ping(binary) :: %Ping{}
-  def ping(url) do
-    System.cmd("ping", ["-c", "1", url])
-    |> parse()
-    |> then(fn parsed -> %Ping{url: url, ping: parsed["ping"], ip: parsed["ip"]} end)
+      iex> Ping.ping("www.netflix.com")
+      %Ping{host: "www.netflix.com", ms: nil, ip: nil}
+  """
+  @spec ping(String.t()) :: %Ping{}
+  def ping(host) do
+    System.cmd("ping", ["-c", "1", host])
+    |> elem(0)
+    |> parse(host)
   end
 
-  defp parse({response, _}) do
-    Regex.named_captures(~r/from (?<ip>.*):.*time=(?<ping>.*) ms\n\n/s, response)
+  defp parse(response, host) do
+    captures = Regex.named_captures(~r/from (?<ip>.*):.*time=(?<time>.*) ms\n\n/s, response)
+    %Ping{host: host, ms: captures["time"], ip: captures["ip"]}
   end
 end
