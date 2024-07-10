@@ -1,5 +1,5 @@
-# This script demonstrates concurrent/async code: all hosts are pinged
-# simultaneously.
+# This script demonstrates concurrent/async code with communication back
+# to the caller. All hosts are pinged simultaneously.
 #
 # To run:
 # mix run scripts/async.exs
