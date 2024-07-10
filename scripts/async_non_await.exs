@@ -25,7 +25,6 @@ www.x.com
 IO.puts(DateTime.utc_now())
 
 hosts
-# convert each host to a {pid, host} tuple (we need to reference the host later)
 |> Enum.each(fn host ->
     spawn(fn ->
       result = Ping.ping(host)
