@@ -1,22 +1,18 @@
-defmodule Ping.Async do
+defmodule Ping.AsyncV1 do
+  @spec ping([Ping.url()]) :: Enumerable.t(Ping.t())
   def ping(urls) do
     me = self()
     for url <- urls do
       spawn(fn -> send(me, Ping.ping(url)) end)
     end
-    urls
-    |> Stream.unfold(&receiver/1)
-    |> Stream.flat_map(&List.wrap/1)
+    receiver(urls)
   end
 
-  defp receiver([]), do: nil
-  defp receiver(urls) do
+  @spec receiver([Ping.url()]) :: [Ping.t()]
+  defp receiver([]), do: []
+  defp receiver([url | urls]) do
     receive do
-      %Ping{} = p -> {p, urls -- [p.url]}
-    after
-      1_000 -> {Enum.map(urls, &dead_ping/1), []}
+      %Ping{} = p when p.url == url  -> [p | receiver(urls)]
     end
   end
-
-  def dead_ping(url), do: %Ping{url: url, ping: nil}
 end
